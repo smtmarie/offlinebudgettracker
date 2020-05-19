@@ -1,28 +1,30 @@
-const indexedDB =
+// const indexedDB =
 
-window.indexedDB ||
-window.mozIndexedDB ||
-window.webkitIndexedDB ||
-window.msIndexedDB ||
-window.shimIndexedDB;
+// window.indexedDB ||
+// window.mozIndexedDB ||
+// window.webkitIndexedDB ||
+// window.msIndexedDB ||
+// window.shimIndexedDB;
 
 let db;
 const request = indexedDB.open("budget", 1);
 
-request.onupgradeneeded = ({ target }) => {
+request.onsuccess = function(event) {
 
-    let db = target.result;
-    db.createObjectStore("pending", { autoIncrement: true });
-};
-
-request.onsuccess = ({ target }) => {
-
-    db = target.result;
+    db = event.target.result;
 
     if (navigator.onLine) {
         checkDatabase();
     }
 };
+
+request.onupgradeneeded = function (event) {
+
+    const db = event.target.result;
+    db.createObjectStore("pending", { autoIncrement: true });
+};
+
+
 
 request.onerror = function (event) {
     console.log("Error" + event.target.errorCode);
@@ -41,7 +43,7 @@ function checkDatabase() {
     const store = transaction.objectStore("pending");
     const getAll = store.getAll();
 
-    getAll.onsuccess = function () {
+    getAll.onsuccess = function() {
 
         if (getAll.result.length > 0) {
 
@@ -54,11 +56,8 @@ function checkDatabase() {
                 }
 
             })
-                .then(response => {
-                
-                return response.json();
-                })
-                
+                .then(response => response.json())
+                                                          
                 .then(() => {
 
                     const transaction = db.transaction(["pending"], "readwrite");

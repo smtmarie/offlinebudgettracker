@@ -1,6 +1,16 @@
 let transactions = [];
 let myChart;
 
+function populateTotal() {
+  // reduce transaction amounts to a single total value
+  let total = transactions.reduce((total, t) => {
+    return total + parseInt(t.value);
+  }, 0);
+
+  let totalEl = document.querySelector("#total");
+  totalEl.textContent = total;
+}
+
 fetch("/api/transaction")
   .then(response => {
     return response.json();
@@ -14,15 +24,6 @@ fetch("/api/transaction")
     populateChart();
   });
 
-function populateTotal() {
-  // reduce transaction amounts to a single total value
-  let total = transactions.reduce((total, t) => {
-    return total + parseInt(t.value);
-  }, 0);
-
-  let totalEl = document.querySelector("#total");
-  totalEl.textContent = total;
-}
 
 function populateTable() {
   let tbody = document.querySelector("#tbody");

@@ -1,12 +1,10 @@
-import { response } from "express";
-
 const CACHE_NAME = "static-cache-v1";
 const DATA_CACHE_NAME = "data-cache-v1";
 
 const FILES_to_CACHE = [
 
     "/",
-    "/indexedDB.js",
+    "/index.html.js",
     "/index.js",
     "/styles.css",
     "/icons/icon-192x192.png",
@@ -22,27 +20,29 @@ self.addEventListener("install", event => {
         })
     );
 
+self.skipWaiting();
+
  });
 
-// self.addEventListener('activate', event => {
-//     event.waitUntil(
-//         cache.keys().then(keyList => {
+self.addEventListener("activate", event => {
+    event.waitUntil(
+        cache.keys().then(keyList => {
 
-//             return Promise.all(
-//                 keyList.map(key => {
+            return Promise.all(
+                keyList.map(key => {
 
-//                 if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
+                if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
 
-//                     return caches.delete(key);
-//                 };
+                    return caches.delete(key);
+                };
 
-//                 })
-//             );
-//         })
-//     );
+                })
+            );
+        })
+    );
 
-//     self.clients.claim();
-// });
+    self.clients.claim();
+});
 
 self.addEventListener("fetch", event => {
 
@@ -57,6 +57,7 @@ self.addEventListener("fetch", event => {
             .then(response => {
 
                 if (response.status === 200) {
+
                     cache.put(event.request.url, response.clone());
                 }
                 return response;
@@ -78,23 +79,32 @@ self.addEventListener("fetch", event => {
 
     event.respondWith(
 
-        fetch(event.request).catch(() => {
+        caches.match(event.request).then(function (response) {
 
-            return caches.match(event.request).then(response => {
-
-                if (response) {
-
-                    return response
-
-                } else if (event.request.headers.get("accept").include("text/html")) {
-
-                    return caches.match("/")
-                }
-            })
-            
+            return response || fetch(event.request);
         })
+
     )
 
-})
+});
+
+//         fetch(event.request).catch(() => {
+
+//             return caches.match(event.request).then(response => {
+
+//                 if (response) {
+
+//                     return response
+
+//                 } else if (event.request.headers.get("accept").include("text/html")) {
+
+//                     return caches.match("/")
+//                 }
+//             })
+            
+//         })
+//     )
+
+// })
 
       
