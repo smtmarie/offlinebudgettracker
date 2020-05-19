@@ -1,21 +1,20 @@
 import { response } from "express";
 
-const CACHE_NAME = 'static-cache-v1';
-const DATA_CACHE_NAME = 'data-cache-v1';
+const CACHE_NAME = "static-cache-v1";
+const DATA_CACHE_NAME = "data-cache-v1";
 
 const FILES_to_CACHE = [
 
-    '/',
-    '/index.html',
-    '/indexedDB.js',
-    '/index.js',
-    '/styles.css',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
+    "/",
+    "/indexedDB.js",
+    "/index.js",
+    "/styles.css",
+    "/icons/icon-192x192.png",
+    "/icons/icon-512x512.png"
 
 ];
 
-self.addEventListener('install', event => {
+self.addEventListener("install", event => {
 
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
@@ -23,32 +22,31 @@ self.addEventListener('install', event => {
         })
     );
 
-    self.skipWaiting();
-});
+ });
 
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        cache.keys().then(keyList => {
+// self.addEventListener('activate', event => {
+//     event.waitUntil(
+//         cache.keys().then(keyList => {
 
-            return Promise.all(
-                keyList.map(key => {
+//             return Promise.all(
+//                 keyList.map(key => {
 
-                if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
+//                 if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
 
-                    return caches.delete(key);
-                };
+//                     return caches.delete(key);
+//                 };
 
-                })
-            );
-        })
-    );
+//                 })
+//             );
+//         })
+//     );
 
-    self.clients.claim();
-});
+//     self.clients.claim();
+// });
 
-self.addEventListener('fetch', event => {
+self.addEventListener("fetch", event => {
 
-    if(event.request.url.includes('/api/')) {
+    if(event.request.url.includes("/api/")) {
 
         event.respondWith(
 
@@ -80,9 +78,23 @@ self.addEventListener('fetch', event => {
 
     event.respondWith(
 
-        caches.match(event.request).then(function (response) {
+        fetch(event.request).catch(() => {
 
-            return response || fetch(event.request);
+            return caches.match(event.request).then(response => {
+
+                if (response) {
+
+                    return response
+
+                } else if (event.request.headers.get("accept").include("text/html")) {
+
+                    return caches.match("/")
+                }
+            })
+            
         })
     )
-});
+
+})
+
+      
