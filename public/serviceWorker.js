@@ -55,7 +55,7 @@ self.addEventListener('fetch', event => {
 
             return fetch (event.request)
 
-            .then(respons => {
+            .then(response => {
 
                 if (response.status === 200) {
                     cache.put(event.request.url, response.clone());
